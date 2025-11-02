@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getChatSessionModel } from "@/schemas/ChatSession";
 
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const authResult = await auth().catch(() => null);
+    const userId = authResult?.userId;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });

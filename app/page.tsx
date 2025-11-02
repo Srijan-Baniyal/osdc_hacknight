@@ -223,11 +223,11 @@ export default function Home() {
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground/15 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-foreground/25">
             <span className="font-sans text-xl font-bold text-foreground">A</span>
           </div>
-          <span className="font-sans text-xl font-semibold tracking-tight text-foreground bg-transparent">Arcadia Labs</span>
+          <span className="font-sans text-xl font-semibold tracking-tight text-foreground bg-transparent">Page Mind</span>
         </Button>
 
         <div className="hidden items-center gap-8 md:flex">
-          {["Overview", "Sessions", "Capabilities", "Why Arcadia", "Sign Up"].map((item, index) => (
+          {["Overview", "Sessions", "Capabilities", "Why Page Mind", "Sign Up"].map((item, index) => (
             <Button
               key={item}
               onClick={() => scrollToSection(index)}

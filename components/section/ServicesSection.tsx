@@ -19,37 +19,37 @@ export default function ServicesSection() {
           }`}
         >
           <h2 className="mb-2 font-sans text-5xl font-light tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Capabilities
+            Platform capabilities
           </h2>
           <p className="font-mono text-sm text-foreground/60 md:text-base">
-            / What we bring to the table
+            / Built for research teams that ship fast
           </p>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 md:gap-x-16 md:gap-y-12 lg:gap-x-24">
           {[
             {
-              title: "Creative Development",
+              title: "Realtime streaming",
               description:
-                "Pushing the boundaries of what's possible on the web",
+                "Vercel AI SDK streaming with resilient error handling and graceful cancellation.",
               direction: "top",
             },
             {
-              title: "Visual Design",
+              title: "Session lifecycle",
               description:
-                "Crafting memorable experiences through thoughtful aesthetics",
+                "Create, rename, and retire conversations while keeping history perfectly in sync.",
               direction: "right",
             },
             {
-              title: "Motion & Animation",
+              title: "BYOK security",
               description:
-                "Bringing interfaces to life with purposeful movement",
+                "Store Perplexity keys locally, toggle between custom and default providers on demand.",
               direction: "left",
             },
             {
-              title: "Technical Strategy",
+              title: "Usage analytics",
               description:
-                "Building scalable solutions that perform beautifully",
+                "Capture tokens, response time, source counts, and key provenance for every answer.",
               direction: "bottom",
             },
           ].map((service, i) => (
@@ -75,6 +75,7 @@ function ServiceCard({
   index: number;
   isVisible: boolean;
 }) {
+  const delayClass = ["delay-0", "delay-[150ms]", "delay-[300ms]", "delay-[450ms]"][index] ?? "";
   const getRevealClass = () => {
     if (!isVisible) {
       switch (service.direction) {
@@ -95,10 +96,7 @@ function ServiceCard({
 
   return (
     <div
-      className={`group transition-all duration-700 ${getRevealClass()}`}
-      style={{
-        transitionDelay: `${index * 150}ms`,
-      }}
+      className={`group transition-all duration-700 ${getRevealClass()} ${delayClass}`}
     >
       <div className="mb-3 flex items-center gap-3">
         <div className="h-px w-8 bg-foreground/30 transition-all duration-300 group-hover:w-12 group-hover:bg-foreground/50" />

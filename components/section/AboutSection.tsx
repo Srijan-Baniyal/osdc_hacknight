@@ -31,7 +31,7 @@ export default function AboutSection({
                 <br />
                 future of
                 <br />
-                <span className="text-foreground/40">digital</span>
+                <span className="text-foreground/40">AI research ops</span>
               </h2>
             </div>
 
@@ -40,17 +40,15 @@ export default function AboutSection({
                 isVisible
                   ? "translate-y-0 opacity-100"
                   : "translate-y-8 opacity-0"
-              }`}
-              style={{ transitionDelay: "200ms" }}
+              } delay-[200ms]`}
             >
               <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                We&apos;re a collective of designers, developers, and creative
-                technologists obsessed with crafting exceptional digital
-                experiences.
+                Page Mind is focused on the workflows behind great answers—streaming transcripts,
+                durable storage, and the controls teams need to keep research organised.
               </p>
               <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                Every project is an opportunity to explore new possibilities and
-                push creative boundaries.
+                From instant session recovery to audit-ready usage metrics, every feature is built
+                to help analysts, founders, and operators trust their AI copilots.
               </p>
             </div>
           </div>
@@ -59,24 +57,26 @@ export default function AboutSection({
           <div className="flex flex-col justify-center space-y-6 md:space-y-12">
             {[
               {
-                value: "150+",
-                label: "Projects",
-                sublabel: "Delivered worldwide",
+                value: "<1s",
+                label: "Stream start",
+                sublabel: "Median time to first token",
                 direction: "right",
               },
               {
-                value: "8",
-                label: "Years",
-                sublabel: "Of innovation",
+                value: "100%",
+                label: "Session recall",
+                sublabel: "Chats synced to MongoDB",
                 direction: "left",
               },
               {
-                value: "12",
-                label: "Awards",
-                sublabel: "Industry recognition",
+                value: "4",
+                label: "Key controls",
+                sublabel: "Add, update, clear, fallback",
                 direction: "right",
               },
             ].map((stat, i) => {
+              const delayClass = ["delay-300", "delay-[450ms]", "delay-[600ms]"][i] ?? "";
+              const alignmentClass = i % 2 === 0 ? "max-w-full" : "ml-auto max-w-[85%]";
               const getRevealClass = () => {
                 if (!isVisible) {
                   return stat.direction === "left"
@@ -89,12 +89,7 @@ export default function AboutSection({
               return (
                 <div
                   key={i}
-                  className={`flex items-baseline gap-4 border-l border-foreground/30 pl-4 transition-all duration-700 md:gap-8 md:pl-8 ${getRevealClass()}`}
-                  style={{
-                    transitionDelay: `${300 + i * 150}ms`,
-                    marginLeft: i % 2 === 0 ? "0" : "auto",
-                    maxWidth: i % 2 === 0 ? "100%" : "85%",
-                  }}
+                  className={`flex items-baseline gap-4 border-l border-foreground/30 pl-4 transition-all duration-700 md:gap-8 md:pl-8 ${getRevealClass()} ${delayClass} ${alignmentClass}`}
                 >
                   <div className="text-3xl font-light text-foreground md:text-6xl lg:text-7xl">
                     {stat.value}
@@ -116,8 +111,7 @@ export default function AboutSection({
         <div
           className={`mt-8 flex flex-wrap gap-3 transition-all duration-700 md:mt-16 md:gap-4 ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-          }`}
-          style={{ transitionDelay: "750ms" }}
+          } delay-[750ms]`}
         >
           <MagneticButton
             size="lg"

@@ -6,6 +6,7 @@ import { Types } from "mongoose";
 import {
   ChatSessionDocument,
   getChatSessionModel,
+  type TokenUsage,
 } from "@/schemas/ChatSession";
 
 interface ChatStreamRequestBody {
@@ -16,7 +17,8 @@ interface ChatStreamRequestBody {
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth();
+    const authResult = await auth().catch(() => null);
+    const userId = authResult?.userId;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -78,6 +80,40 @@ export async function POST(request: Request) {
   const apiKeyType = apiKey ? "custom" : "default";
 
     const initialMessageCount = session.messages.length;
+
+    const normalizeUsage = (usage?: LanguageModelUsage | null): TokenUsage | undefined => {
+      if (!usage) {
+        return undefined;
+      }
+
+      const asAny = usage as Record<string, unknown>;
+      const getNumber = (value: unknown): number | null =>
+        typeof value === "number" && Number.isFinite(value) ? value : null;
+
+      const inputTokens = getNumber(asAny.inputTokens ?? asAny.promptTokens ?? null);
+      const outputTokens = getNumber(asAny.outputTokens ?? asAny.completionTokens ?? null);
+      const directTotal = getNumber(asAny.totalTokens ?? null);
+
+      const derivedTotal =
+        directTotal ??
+        (inputTokens !== null || outputTokens !== null
+          ? (inputTokens ?? 0) + (outputTokens ?? 0)
+          : null);
+
+      if (
+        inputTokens === null &&
+        outputTokens === null &&
+        derivedTotal === null
+      ) {
+        return undefined;
+      }
+
+      return {
+        inputTokens,
+        outputTokens,
+        totalTokens: derivedTotal,
+      };
+    };
 
     const responseStream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -154,13 +190,7 @@ export async function POST(request: Request) {
             resolveSourceCount(),
           ]);
 
-          const usagePayload = usageData
-            ? {
-                inputTokens: usageData.inputTokens ?? null,
-                outputTokens: usageData.outputTokens ?? null,
-                totalTokens: usageData.totalTokens ?? null,
-              }
-            : undefined;
+          const usagePayload = normalizeUsage(usageData);
 
           session.messages.push(
             { role: "user", content: prompt, createdAt: new Date() },

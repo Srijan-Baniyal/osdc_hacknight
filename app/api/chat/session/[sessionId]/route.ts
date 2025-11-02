@@ -3,8 +3,6 @@ import { auth } from "@clerk/nextjs/server";
 import { Types } from "mongoose";
 import { getChatSessionModel } from "@/schemas/ChatSession";
 
-export const dynamic = "force-dynamic";
-
 const MAX_TITLE_LENGTH = 120;
 
 export async function PATCH(
@@ -12,7 +10,8 @@ export async function PATCH(
   context: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const authResult = await auth().catch(() => null);
+    const userId = authResult?.userId;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -64,7 +63,8 @@ export async function DELETE(
   context: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const authResult = await auth().catch(() => null);
+    const userId = authResult?.userId;
 
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });

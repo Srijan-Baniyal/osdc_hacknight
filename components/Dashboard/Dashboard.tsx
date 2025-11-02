@@ -163,9 +163,15 @@ export default function Dashboard() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const renderMessageMeta = (message: ChatMessage) => {
     const timestamp = message.createdAt ? formatTimestamp(message.createdAt) : "";
-    const metaParts: string[] = [];
+    const isUserMessage = message.role === "user";
 
-    if (message.role === "assistant") {
+    const pills: Array<{ key: string; label: string; value: string }> = [];
+
+    if (timestamp) {
+      pills.push({ key: `timestamp-${timestamp}`, label: "Sent", value: timestamp });
+    }
+
+    if (!isUserMessage) {
       const coerceNumber = (value: number | null | undefined) =>
         typeof value === "number" && Number.isFinite(value) ? value : undefined;
 
@@ -174,50 +180,75 @@ export default function Dashboard() {
       const outputTokens = coerceNumber(usage?.outputTokens ?? undefined);
       const totalTokens = coerceNumber(usage?.totalTokens ?? undefined);
 
-      const tokenParts: string[] = [];
-      if (inputTokens !== undefined) {
-        tokenParts.push(`${inputTokens} in`);
-      }
-      if (outputTokens !== undefined) {
-        tokenParts.push(`${outputTokens} out`);
-      }
-      if (totalTokens !== undefined) {
-        tokenParts.push(`${totalTokens} total`);
-      }
-      if (tokenParts.length > 0) {
-        metaParts.push(`Tokens ${tokenParts.join(" · ")}`);
-      }
+      const formatToken = (label: string, value: number | undefined) =>
+        value !== undefined ? `${label} ${value}` : `${label} N/A`;
+
+      pills.push({
+        key: "tokens",
+        label: "Tokens",
+        value: [
+          formatToken("Input", inputTokens),
+          formatToken("Output", outputTokens),
+          formatToken("Total", totalTokens),
+        ].join(" · "),
+      });
 
       const durationMs = coerceNumber(message.durationMs ?? undefined);
-      if (durationMs !== undefined) {
+      const durationLabel = (() => {
+        if (durationMs === undefined) {
+          return "N/A";
+        }
         const seconds = durationMs / 1000;
         const formattedSeconds = seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1);
-        metaParts.push(`Time ${formattedSeconds.replace(/\.0$/, "")}s`);
-      }
+        return `${formattedSeconds.replace(/\.0$/, "")}s`;
+      })();
+      pills.push({ key: "duration", label: "Latency", value: durationLabel });
 
       const sourceCount = coerceNumber(message.sourceCount ?? undefined);
-      if (sourceCount !== undefined) {
-        metaParts.push(`Sources ${sourceCount}`);
-      }
+      pills.push({
+        key: "sources",
+        label: "Sources",
+        value: sourceCount !== undefined ? String(sourceCount) : "N/A",
+      });
 
       if (message.apiKeyType) {
-        metaParts.push(`Key ${message.apiKeyType === "custom" ? "Custom" : "Default"}`);
+        pills.push({
+          key: "api-key",
+          label: "Key",
+          value: message.apiKeyType === "custom" ? "Custom" : "Default",
+        });
       }
     }
 
-    const items = [timestamp, ...metaParts].filter(Boolean);
-    if (items.length === 0) {
+    if (pills.length === 0) {
       return null;
     }
 
     return (
       <div
         className={cn(
-          "mt-3 text-xs",
-          message.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
+          "mt-3 flex flex-wrap gap-2 text-[11px] font-medium",
+          isUserMessage ? "text-primary-foreground" : "text-foreground"
         )}
       >
-        {items.join(" • ")}
+        {pills.map((pill) => (
+          <span
+            key={pill.key}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full border px-2 py-1",
+              isUserMessage
+                ? "border-primary/40 bg-primary/70 text-primary-foreground"
+                : "border-border bg-muted/60 text-foreground"
+            )}
+          >
+            <span className="text-[9px] font-semibold uppercase tracking-[0.14em] opacity-80">
+              {pill.label}
+            </span>
+            <span className="text-[11px] font-semibold normal-case tracking-normal opacity-95">
+              {pill.value}
+            </span>
+          </span>
+        ))}
       </div>
     );
   };

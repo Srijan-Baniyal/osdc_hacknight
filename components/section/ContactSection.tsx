@@ -20,10 +20,12 @@ export default function ContactSection() {
                 }`}
               >
                 <h2 className="mb-2 font-sans text-4xl font-light leading-[1.05] tracking-tight text-foreground md:mb-3 md:text-7xl lg:text-8xl">
-                  Sign Up
+                  Launch your
+                  <br />
+                  workspace
                 </h2>
                 <p className="font-mono text-xs text-foreground/60 md:text-base">
-                  / Get Started
+                  / Create an account to access the dashboard
                 </p>
               </div>
             </div>

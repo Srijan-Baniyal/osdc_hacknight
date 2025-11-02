@@ -77,6 +77,8 @@ function ProjectCard({
   index: number;
   isVisible: boolean;
 }) {
+  const delayClass = ["delay-0", "delay-[150ms]", "delay-[300ms]"][index] ?? "";
+  const sizeClass = index % 2 === 0 ? "max-w-[85%]" : "ml-auto max-w-[90%]";
   const getRevealClass = () => {
     if (!isVisible) {
       return project.direction === "left"
@@ -88,12 +90,7 @@ function ProjectCard({
 
   return (
     <div
-      className={`group flex items-center justify-between border-b border-foreground/10 py-6 transition-all duration-700 hover:border-foreground/20 md:py-8 ${getRevealClass()}`}
-      style={{
-        transitionDelay: `${index * 150}ms`,
-        marginLeft: index % 2 === 0 ? "0" : "auto",
-        maxWidth: index % 2 === 0 ? "85%" : "90%",
-      }}
+      className={`group flex items-center justify-between border-b border-foreground/10 py-6 transition-all duration-700 hover:border-foreground/20 md:py-8 ${getRevealClass()} ${delayClass} ${sizeClass}`}
     >
       <div className="flex items-baseline gap-4 md:gap-8">
         <span className="font-mono text-sm text-foreground/30 transition-colors group-hover:text-foreground/50 md:text-base">

@@ -135,6 +135,7 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
   const abortControllerRef = useRef<AbortController | null>(null);
   const conversationIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const wasStreamingRef = useRef(false);
 
   const { data: sessionsData, isLoading: isHistoryLoading, isFetching: isHistoryFetching } = useQuery({
     queryKey: CHAT_SESSIONS_KEY,
@@ -152,6 +153,28 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
       messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
     }
   }, [messages]);
+
+  useEffect(() => {
+    const wasStreaming = wasStreamingRef.current;
+    wasStreamingRef.current = isStreaming;
+
+    if (!wasStreaming || isStreaming) {
+      return;
+    }
+
+    if (!activeSessionId) {
+      return;
+    }
+
+    const session = sessions.find((item) => item._id === activeSessionId);
+    if (!session || session.messages.length === 0) {
+      return;
+    }
+
+    queueMicrotask(() => {
+      setMessages(session.messages.map((message) => ({ ...message })));
+    });
+  }, [isStreaming, activeSessionId, sessions]);
 
   const sendPromptMutation = useMutation({
     mutationFn: async ({ prompt, conversationId, apiKey: providedKey }: SendPromptVariables) => {
