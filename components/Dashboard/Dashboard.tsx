@@ -1,62 +1,319 @@
-export default async function Dashboard() {
-    return (
-        <div className="min-h-screen bg-background">
-            <div className="container mx-auto px-4 py-8">
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-4xl font-bold">Dashboard</h1>
-                            <p className="text-muted-foreground mt-2">
-                                Welcome back hello!
-                            </p>
-                        </div>
-                    </div>
+"use client";
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div className="p-6 bg-card rounded-lg border shadow-sm">
-                            <h3 className="text-lg font-semibold mb-2">Account Info</h3>
-                            <div className="space-y-2 text-sm">
-                                <p>
-                                    <span className="text-muted-foreground">Email:</span>{" "}
-                                    hello
-                                </p>
-                                <p>
-                                    <span className="text-muted-foreground">Name:</span>{" "}
-                                    hello
-                                </p>
-                                <p>
-                                    <span className="text-muted-foreground">Email Verified:</span>{" "}
-                                    hello   
-                                </p>
-                            </div>
-                        </div>
+import { useRef, useState, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import {
+  formatTimestamp,
+  useChatDashboard,
+  type ChatMessage,
+} from "../../context/ChatContext";
+import { Streamdown } from "streamdown";
 
-                        <div className="p-6 bg-card rounded-lg border shadow-sm">
-                            <h3 className="text-lg font-semibold mb-2">Security</h3>
-                            <div className="space-y-2 text-sm">
-                                <p>
-                                    <span className="text-muted-foreground">2FA Status:</span>{" "}
-                                    hello
-                                </p>
-                            </div>
-                        </div>
+interface ParsedAssistantContent {
+  thinking: string;
+  answer: string;
+  sources: string;
+}
 
-                        <div className="p-6 bg-card rounded-lg border shadow-sm">
-                            <h3 className="text-lg font-semibold mb-2">Session Info</h3>
-                            <div className="space-y-2 text-sm">
-                                <p>
-                                    <span className="text-muted-foreground">Session ID:</span>{" "}
-                                    hello
-                                </p>
-                                <p>
-                                    <span className="text-muted-foreground">Created:</span>{" "}
-                                    hello
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+const THINK_OPEN_REGEX = /<\s*(think|thinking)\s*>/i;
+const THINK_CLOSE_REGEX = /<\s*\/\s*(think|thinking)\s*>/i;
+
+function parseAssistantContent(content: string | undefined | null): ParsedAssistantContent {
+  if (!content) {
+    return { thinking: "", answer: "", sources: "" };
+  }
+
+  let remaining = content;
+  let thinking = "";
+
+  const thinkOpenMatch = remaining.match(THINK_OPEN_REGEX);
+  if (thinkOpenMatch?.index !== undefined) {
+    const openTag = thinkOpenMatch[0];
+    const startIndex = thinkOpenMatch.index;
+    const afterOpen = remaining.slice(startIndex + openTag.length);
+    const thinkCloseMatch = afterOpen.match(THINK_CLOSE_REGEX);
+
+    if (thinkCloseMatch?.index !== undefined) {
+      const closeTag = thinkCloseMatch[0];
+      thinking = afterOpen.slice(0, thinkCloseMatch.index).trim();
+      const afterCloseIndex = thinkCloseMatch.index + closeTag.length;
+      remaining = `${remaining.slice(0, startIndex)}${afterOpen.slice(afterCloseIndex)}`;
+    } else {
+      thinking = afterOpen.trim();
+      remaining = remaining.slice(0, startIndex);
+    }
+  }
+
+  const sourcesMarker = /Sources?\s*:/i;
+  let sources = "";
+  const sourcesIndex = remaining.search(sourcesMarker);
+  if (sourcesIndex !== -1) {
+    const sourcesContent = remaining.slice(sourcesIndex);
+    sources = sourcesContent.replace(sourcesMarker, "").trim();
+    remaining = remaining.slice(0, sourcesIndex);
+  }
+
+  const answer = remaining.trim();
+
+  return {
+    thinking: thinking.trim(),
+    answer,
+    sources: sources.trim(),
+  };
+}
+
+interface AssistantSectionProps {
+  title: string;
+  children: ReactNode;
+  tone?: "muted" | "default";
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+}
+
+function AssistantSection({
+  title,
+  children,
+  tone,
+  collapsible = false,
+  defaultOpen = false,
+}: AssistantSectionProps) {
+  const [isOpen, setIsOpen] = useState(() => (collapsible ? defaultOpen : true));
+  const resolvedOpen = collapsible ? isOpen : true;
+
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border px-4 py-3",
+        tone === "muted" ? "bg-muted/30 border-dashed" : "bg-background/70"
+      )}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {title}
         </div>
+        {collapsible && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="h-auto px-2 py-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground"
+          >
+            {resolvedOpen ? "Hide" : "Show"}
+          </Button>
+        )}
+      </div>
+      {(!collapsible || resolvedOpen) && <div className={collapsible ? "mt-2 space-y-2" : "mt-2"}>{children}</div>}
+    </div>
+  );
+}
+
+function AssistantMessage({ content, isStreaming }: { content: string; isStreaming: boolean }) {
+  const { thinking, answer, sources } = parseAssistantContent(content);
+  const hasContent = Boolean(thinking || answer || sources);
+
+  if (!hasContent) {
+    return <span className="text-muted-foreground">{isStreaming ? "Thinking…" : "Waiting for response."}</span>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {thinking && (
+        <AssistantSection
+          title="Thinking"
+          tone="muted"
+          collapsible
+        >
+          <Streamdown className="text-sm leading-relaxed" isAnimating={isStreaming}>
+            {thinking}
+          </Streamdown>
+        </AssistantSection>
+      )}
+      {answer && (
+        <AssistantSection title="Answer">
+          <Streamdown className="text-sm leading-relaxed" isAnimating={isStreaming}>
+            {answer}
+          </Streamdown>
+        </AssistantSection>
+      )}
+      {sources && (
+        <AssistantSection title="Sources" tone="muted">
+          <Streamdown className="text-sm leading-relaxed" isAnimating={isStreaming}>
+            {sources}
+          </Streamdown>
+        </AssistantSection>
+      )}
+    </div>
+  );
+}
+
+export default function Dashboard() {
+  const {
+    messages,
+    messagesEndRef,
+    input,
+    setInput,
+    handleSubmit,
+    handleStop,
+    isStreaming,
+    isSending,
+  } = useChatDashboard();
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const renderMessageMeta = (message: ChatMessage) => {
+    const timestamp = message.createdAt ? formatTimestamp(message.createdAt) : "";
+    const metaParts: string[] = [];
+
+    if (message.role === "assistant") {
+      const coerceNumber = (value: number | null | undefined) =>
+        typeof value === "number" && Number.isFinite(value) ? value : undefined;
+
+      const usage = message.usage;
+      const inputTokens = coerceNumber(usage?.inputTokens ?? undefined);
+      const outputTokens = coerceNumber(usage?.outputTokens ?? undefined);
+      const totalTokens = coerceNumber(usage?.totalTokens ?? undefined);
+
+      const tokenParts: string[] = [];
+      if (inputTokens !== undefined) {
+        tokenParts.push(`${inputTokens} in`);
+      }
+      if (outputTokens !== undefined) {
+        tokenParts.push(`${outputTokens} out`);
+      }
+      if (totalTokens !== undefined) {
+        tokenParts.push(`${totalTokens} total`);
+      }
+      if (tokenParts.length > 0) {
+        metaParts.push(`Tokens ${tokenParts.join(" · ")}`);
+      }
+
+      const durationMs = coerceNumber(message.durationMs ?? undefined);
+      if (durationMs !== undefined) {
+        const seconds = durationMs / 1000;
+        const formattedSeconds = seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1);
+        metaParts.push(`Time ${formattedSeconds.replace(/\.0$/, "")}s`);
+      }
+
+      const sourceCount = coerceNumber(message.sourceCount ?? undefined);
+      if (sourceCount !== undefined) {
+        metaParts.push(`Sources ${sourceCount}`);
+      }
+
+      if (message.apiKeyType) {
+        metaParts.push(`Key ${message.apiKeyType === "custom" ? "Custom" : "Default"}`);
+      }
+    }
+
+    const items = [timestamp, ...metaParts].filter(Boolean);
+    if (items.length === 0) {
+      return null;
+    }
+
+    return (
+      <div
+        className={cn(
+          "mt-3 text-xs",
+          message.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
+        )}
+      >
+        {items.join(" • ")}
+      </div>
     );
+  };
+
+  return (
+    <section className="flex h-full flex-col overflow-hidden rounded-3xl border bg-card shadow-lg">
+      <header className="border-b px-10 pb-6 pt-8">
+        <h1 className="text-2xl font-semibold text-foreground">
+          Perplexity Assistant
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Chat with Perplexity via the Vercel AI SDK and keep every message
+          synced with MongoDB. Stay in flow with realtime streaming responses
+          tailored to your research.
+        </p>
+      </header>
+      <div className="flex flex-1 flex-col overflow-hidden px-10 pb-6">
+        <div className="flex-1 space-y-5 overflow-y-auto rounded-3xl border bg-muted/30 px-6 py-7">
+          {messages.length === 0 ? (
+            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+              Ask anything to get started.
+            </div>
+          ) : (
+            messages.map((message, index) => (
+              <div
+                key={`${message.role}-${index}-${message.createdAt ?? index}`}
+                className={cn(
+                  "flex",
+                  message.role === "user" ? "justify-end" : "justify-start"
+                )}
+              >
+                <div
+                  className={cn(
+                    "max-w-2xl rounded-3xl px-5 py-4 text-sm leading-relaxed shadow-sm",
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground shadow-lg"
+                      : "bg-card text-card-foreground shadow-lg"
+                  )}
+                >
+                  {message.role === "assistant" ? (
+                    <AssistantMessage
+                      content={message.content}
+                      isStreaming={isStreaming && index === messages.length - 1}
+                    />
+                  ) : (
+                    <div className="whitespace-pre-wrap">{message.content}</div>
+                  )}
+                  {renderMessageMeta(message)}
+                </div>
+              </div>
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        <form
+          ref={formRef}
+          onSubmit={handleSubmit}
+          className="mt-6 flex w-full items-end gap-4 rounded-2xl border bg-card px-4 py-4 shadow-sm"
+        >
+          <Textarea
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.altKey &&
+                !event.metaKey &&
+                !event.ctrlKey
+              ) {
+                event.preventDefault();
+                if (!isSending && input.trim()) {
+                  formRef.current?.requestSubmit();
+                }
+              }
+            }}
+            placeholder="Ask Perplexity anything..."
+            rows={3}
+            className="resize-none border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
+            disabled={isSending}
+          />
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button type="submit" disabled={!input.trim() || isSending}>
+              {isSending ? "Sending" : "Send"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!isStreaming}
+              onClick={handleStop}
+            >
+              Stop
+            </Button>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
 }

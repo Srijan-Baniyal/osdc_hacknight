@@ -18,10 +18,10 @@ export default function WorkSection() {
           }`}
         >
           <h2 className="mb-2 font-sans text-5xl font-light tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Featured
+            Session highlights
           </h2>
           <p className="font-mono text-sm text-foreground/60 md:text-base">
-            / Recent explorations
+            / What teams see inside the dashboard
           </p>
         </div>
 
@@ -29,23 +29,23 @@ export default function WorkSection() {
           {[
             {
               number: "01",
-              title: "Kinetic Typography",
-              category: "Interactive Experience",
-              year: "2024",
+              title: "Persistent timelines",
+              category: "Auto-sync your entire conversation history with MongoDB",
+              year: "Live",
               direction: "left",
             },
             {
               number: "02",
-              title: "Generative Patterns",
-              category: "Visual System",
-              year: "2024",
+              title: "One-click session control",
+              category: "Rename or delete threads without breaking streaming replies",
+              year: "Live",
               direction: "right",
             },
             {
               number: "03",
-              title: "Spatial Interface",
-              category: "3D Navigation",
-              year: "2023",
+              title: "Usage metadata",
+              category: "Surface tokens, duration, key provenance, and source counts instantly",
+              year: "New",
               direction: "left",
             },
           ].map((project, i) => (

@@ -223,11 +223,11 @@ export default function Home() {
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground/15 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-foreground/25">
             <span className="font-sans text-xl font-bold text-foreground">A</span>
           </div>
-          <span className="font-sans text-xl font-semibold tracking-tight text-foreground bg-transparent">Acme</span>
+          <span className="font-sans text-xl font-semibold tracking-tight text-foreground bg-transparent">Arcadia Labs</span>
         </Button>
 
         <div className="hidden items-center gap-8 md:flex">
-          {["Home", "Work", "Services", "About", "Sign Up"].map((item, index) => (
+          {["Overview", "Sessions", "Capabilities", "Why Arcadia", "Sign Up"].map((item, index) => (
             <Button
               key={item}
               onClick={() => scrollToSection(index)}
@@ -261,37 +261,38 @@ export default function Home() {
         <section className="flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pb-16 pt-24 md:px-12 md:pb-24">
           <div className="max-w-3xl">
             <div className="mb-4 inline-block animate-in fade-in slide-in-from-bottom-4 rounded-full border border-foreground/20 bg-foreground/15 px-4 py-1.5 backdrop-blur-md duration-700">
-              <p className="font-mono text-xs text-foreground/90">WebGL Powered Design</p>
+              <p className="font-mono text-xs text-foreground/90">Perplexity-powered research workspace</p>
             </div>
             <h1 className="mb-6 animate-in fade-in slide-in-from-bottom-8 font-sans text-6xl font-light leading-[1.1] tracking-tight text-foreground duration-1000 md:text-7xl lg:text-8xl">
               <span className="text-balance">
-                Creative experiences
+                Collaborative research that
                 <br />
-                in fluid motion
+                remembers every insight
               </span>
             </h1>
             <p className="mb-8 max-w-xl animate-in fade-in slide-in-from-bottom-4 text-lg leading-relaxed text-foreground/90 duration-1000 delay-200 md:text-xl">
               <span className="text-pretty">
-                Transforming digital spaces with dynamic shader effects and real-time visual experiences that captivate
-                and inspire.
+                Spin up a shared Perplexity workspace with streaming responses, session history, rename and delete controls,
+                bring-your-own-key support, and realtime usage analytics for every answer.
               </span>
             </p>
             <div className="flex animate-in fade-in slide-in-from-bottom-4 flex-col gap-4 duration-1000 delay-300 sm:flex-row sm:items-center">
               <MagneticButton
                 size="lg"
                 variant="primary"
+                onClick={() => scrollToSection(4)}
               >
-                Open in v0
+                Open dashboard
               </MagneticButton>
-              <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(2)}>
-                View Demo
+              <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(1)}>
+                Explore features
               </MagneticButton>
             </div>
           </div>
 
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-in fade-in duration-1000 delay-500">
             <div className="flex items-center gap-2">
-              <p className="font-mono text-xs text-foreground/80">Scroll to explore</p>
+              <p className="font-mono text-xs text-foreground/80">Scroll sideways to tour the platform</p>
               <div className="flex h-6 w-12 items-center justify-center rounded-full border border-foreground/20 bg-foreground/15 backdrop-blur-md">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-foreground/80" />
               </div>

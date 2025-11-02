@@ -3,6 +3,7 @@
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { SignOutButton } from "@clerk/nextjs";
 
 export function Navbar() {
   return (
@@ -14,6 +15,7 @@ export function Navbar() {
       </div>
       <div className="flex items-center gap-2">
         <ThemeSwitcher />
+        <SignOutButton />
       </div>
     </header>
   );

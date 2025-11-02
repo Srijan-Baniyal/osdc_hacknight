@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/Dashboard/DashBoardSidebar";
 import { Navbar } from "@/components/Dashboard/DashboardNavbar";
+import { ChatDashboardProvider } from "@/context/ChatContext";
 
 export const metadata: Metadata = {
   title: "Percepta Dashboard",
@@ -16,11 +17,13 @@ export default function RootLayout({
   return (
     <>
       <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <Navbar />
-          <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>
-        </SidebarInset>
+        <ChatDashboardProvider>
+          <AppSidebar />
+          <SidebarInset>
+            <Navbar />
+            <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>
+          </SidebarInset>
+        </ChatDashboardProvider>
       </SidebarProvider>
     </>
   );
