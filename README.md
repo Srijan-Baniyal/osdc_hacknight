@@ -293,6 +293,10 @@ Contributions are welcome! Please follow these steps:
 
 This project is licensed under the MIT License.
 
+## 📀 Video
+
+https://github.com/user-attachments/assets/f7317b77-5bf6-4562-be12-38d455c1565c
+
 ## 🙏 Acknowledgments
 
 - [Perplexity AI](https://www.perplexity.ai/) for the AI models
