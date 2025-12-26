@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "sonner";
-import ReactQueryProvider from "@/provider/ReactQueryProvider";
 import { ClerkProvider } from "@clerk/nextjs";
-import ThemeProvider from "@/provider/ThemeProvider";
+import { headers } from "next/headers";
+import { Suspense } from "react";
+import { Toaster } from "sonner";
+import ReactQueryProvider from "@/provider/reactQueryProvider";
+import ThemeProvider from "@/provider/themeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,20 +28,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  headers();
   return (
-    <>
-      <ClerkProvider>
-        <html lang="en">
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <Suspense
+            fallback={
+              <div className="flex h-screen w-screen items-center justify-center">
+                Loading...
+              </div>
+            }
           >
-               <ThemeProvider>
+            <ThemeProvider>
               <ReactQueryProvider>{children}</ReactQueryProvider>
-              </ThemeProvider>
-              <Toaster position="top-center" richColors />
-          </body>
-        </html>
-      </ClerkProvider>
-    </>
+            </ThemeProvider>
+          </Suspense>
+          <Toaster position="top-center" richColors />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

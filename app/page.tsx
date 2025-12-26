@@ -1,239 +1,267 @@
-"use client"
+"use client";
 
-import { Shader, ChromaFlow, Swirl } from "shaders/react"
-import CustomCursor from "@/components/CustomCursor"
-import GrainOverlay from "@/components/GrainOverlay"
-import WorkSection from "@/components/section/WorkSection"
-import ServicesSection from "@/components/section/ServicesSection"
-import AboutSection from "@/components/section/AboutSection";
-import ContactSection from "@/components/section/ContactSection"
-import MagneticButton from "@/components/MagneticButton"
-import { useRef, useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChromaFlow, Shader, Swirl } from "shaders/react";
+import CustomCursor from "@/components/customCursor";
+import GrainOverlay from "@/components/grainOverlay";
+import MagneticButton from "@/components/magneticButton";
+import AboutSection from "@/components/section/aboutSection";
+import ContactSection from "@/components/section/contactSection";
+import ServicesSection from "@/components/section/servicesSection";
+import WorkSection from "@/components/section/workSection";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const [currentSection, setCurrentSection] = useState(0)
-  const [isLoaded, setIsLoaded] = useState(false)
-  const touchStartY = useRef(0)
-  const touchStartX = useRef(0)
-  const shaderContainerRef = useRef<HTMLDivElement>(null)
-  const scrollThrottleRef = useRef<number | null>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [currentSection, setCurrentSection] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
+  const shaderContainerRef = useRef<HTMLDivElement>(null);
+  const scrollThrottleRef = useRef<number | null>(null);
 
   useEffect(() => {
     const checkShaderReady = () => {
       if (shaderContainerRef.current) {
-        const canvas = shaderContainerRef.current.querySelector("canvas")
+        const canvas = shaderContainerRef.current.querySelector("canvas");
         if (canvas && canvas.width > 0 && canvas.height > 0) {
-          setIsLoaded(true)
-          return true
+          setIsLoaded(true);
+          return true;
         }
       }
-      return false
-    }
+      return false;
+    };
 
-    if (checkShaderReady()) return
+    if (checkShaderReady()) {
+      return;
+    }
 
     const intervalId = setInterval(() => {
       if (checkShaderReady()) {
-        clearInterval(intervalId)
+        clearInterval(intervalId);
       }
-    }, 100)
+    }, 100);
 
     const fallbackTimer = setTimeout(() => {
-      setIsLoaded(true)
-    }, 1500)
+      setIsLoaded(true);
+    }, 1500);
 
     return () => {
-      clearInterval(intervalId)
-      clearTimeout(fallbackTimer)
-    }
-  }, [])
+      clearInterval(intervalId);
+      clearTimeout(fallbackTimer);
+    };
+  }, []);
 
-  const scrollToSection = (index: number) => {
+  const scrollToSection = useCallback((index: number) => {
     if (scrollContainerRef.current) {
-      const sectionWidth = scrollContainerRef.current.offsetWidth
+      const sectionWidth = scrollContainerRef.current.offsetWidth;
       scrollContainerRef.current.scrollTo({
         left: sectionWidth * index,
         behavior: "smooth",
-      })
-      setCurrentSection(index)
+      });
+      setCurrentSection(index);
     }
-  }
+  }, []);
 
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY
-      touchStartX.current = e.touches[0].clientX
-    }
+      touchStartY.current = e.touches[0].clientY;
+      touchStartX.current = e.touches[0].clientX;
+    };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (Math.abs(e.touches[0].clientY - touchStartY.current) > 10) {
-        e.preventDefault()
+        e.preventDefault();
       }
-    }
+    };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      const touchEndY = e.changedTouches[0].clientY
-      const touchEndX = e.changedTouches[0].clientX
-      const deltaY = touchStartY.current - touchEndY
-      const deltaX = touchStartX.current - touchEndX
+      const touchEndY = e.changedTouches[0].clientY;
+      const touchEndX = e.changedTouches[0].clientX;
+      const deltaY = touchStartY.current - touchEndY;
+      const deltaX = touchStartX.current - touchEndX;
 
       if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
         if (deltaY > 0 && currentSection < 4) {
-          scrollToSection(currentSection + 1)
+          scrollToSection(currentSection + 1);
         } else if (deltaY < 0 && currentSection > 0) {
-          scrollToSection(currentSection - 1)
+          scrollToSection(currentSection - 1);
         }
       }
-    }
+    };
 
-    const container = scrollContainerRef.current
+    const container = scrollContainerRef.current;
     if (container) {
-      container.addEventListener("touchstart", handleTouchStart, { passive: true })
-      container.addEventListener("touchmove", handleTouchMove, { passive: false })
-      container.addEventListener("touchend", handleTouchEnd, { passive: true })
+      container.addEventListener("touchstart", handleTouchStart, {
+        passive: true,
+      });
+      container.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+      container.addEventListener("touchend", handleTouchEnd, { passive: true });
     }
 
     return () => {
       if (container) {
-        container.removeEventListener("touchstart", handleTouchStart)
-        container.removeEventListener("touchmove", handleTouchMove)
-        container.removeEventListener("touchend", handleTouchEnd)
+        container.removeEventListener("touchstart", handleTouchStart);
+        container.removeEventListener("touchmove", handleTouchMove);
+        container.removeEventListener("touchend", handleTouchEnd);
       }
-    }
-  }, [currentSection])
+    };
+  }, [currentSection, scrollToSection]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        e.preventDefault()
+        e.preventDefault();
 
-        if (!scrollContainerRef.current) return
+        if (!scrollContainerRef.current) {
+          return;
+        }
 
         scrollContainerRef.current.scrollBy({
           left: e.deltaY,
           behavior: "instant",
-        })
+        });
 
-        const sectionWidth = scrollContainerRef.current.offsetWidth
-        const newSection = Math.round(scrollContainerRef.current.scrollLeft / sectionWidth)
+        const sectionWidth = scrollContainerRef.current.offsetWidth;
+        const newSection = Math.round(
+          scrollContainerRef.current.scrollLeft / sectionWidth
+        );
         if (newSection !== currentSection) {
-          setCurrentSection(newSection)
+          setCurrentSection(newSection);
         }
       }
-    }
+    };
 
-    const container = scrollContainerRef.current
+    const container = scrollContainerRef.current;
     if (container) {
-      container.addEventListener("wheel", handleWheel, { passive: false })
+      container.addEventListener("wheel", handleWheel, { passive: false });
     }
 
     return () => {
       if (container) {
-        container.removeEventListener("wheel", handleWheel)
+        container.removeEventListener("wheel", handleWheel);
       }
-    }
-  }, [currentSection])
+    };
+  }, [currentSection]);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (scrollThrottleRef.current !== null) return
+      if (scrollThrottleRef.current !== null) {
+        return;
+      }
 
       scrollThrottleRef.current = requestAnimationFrame(() => {
         if (!scrollContainerRef.current) {
-          scrollThrottleRef.current = null
-          return
+          scrollThrottleRef.current = null;
+          return;
         }
 
-        const sectionWidth = scrollContainerRef.current.offsetWidth
-        const scrollLeft = scrollContainerRef.current.scrollLeft
-        const newSection = Math.round(scrollLeft / sectionWidth)
+        const sectionWidth = scrollContainerRef.current.offsetWidth;
+        const scrollLeft = scrollContainerRef.current.scrollLeft;
+        const newSection = Math.round(scrollLeft / sectionWidth);
 
-        if (newSection !== currentSection && newSection >= 0 && newSection <= 4) {
-          setCurrentSection(newSection)
+        if (
+          newSection !== currentSection &&
+          newSection >= 0 &&
+          newSection <= 4
+        ) {
+          setCurrentSection(newSection);
         }
 
-        scrollThrottleRef.current = null
-      })
-    }
+        scrollThrottleRef.current = null;
+      });
+    };
 
-    const container = scrollContainerRef.current
+    const container = scrollContainerRef.current;
     if (container) {
-      container.addEventListener("scroll", handleScroll, { passive: true })
+      container.addEventListener("scroll", handleScroll, { passive: true });
     }
 
     return () => {
       if (container) {
-        container.removeEventListener("scroll", handleScroll)
+        container.removeEventListener("scroll", handleScroll);
       }
       if (scrollThrottleRef.current !== null) {
-        cancelAnimationFrame(scrollThrottleRef.current)
+        cancelAnimationFrame(scrollThrottleRef.current);
       }
-    }
-  }, [currentSection])
+    };
+  }, [currentSection]);
 
   return (
     <main className="relative h-screen w-full overflow-hidden bg-background">
       <CustomCursor />
       <GrainOverlay />
       <div
-        ref={shaderContainerRef}
         className={`fixed inset-0 z-0 transition-opacity duration-700 contain-strict ${isLoaded ? "opacity-100" : "opacity-0"}`}
+        ref={shaderContainerRef}
       >
         <Shader className="h-full w-full">
           <Swirl
-            colorA="#1275d8"
-            colorB="#e19136"
-            speed={0.8}
-            detail={0.8}
             blend={50}
             coarseX={40}
             coarseY={40}
-            mediumX={40}
-            mediumY={40}
+            colorA="#1275d8"
+            colorB="#e19136"
+            detail={0.8}
             fineX={40}
             fineY={40}
+            mediumX={40}
+            mediumY={40}
+            speed={0.8}
           />
           <ChromaFlow
             baseColor="#0066ff"
-            upColor="#0066ff"
             downColor="#d1d1d1"
-            leftColor="#e19136"
-            rightColor="#e19136"
             intensity={0.9}
-            radius={1.8}
-            momentum={25}
+            leftColor="#e19136"
             maskType="alpha"
+            momentum={25}
             opacity={0.97}
+            radius={1.8}
+            rightColor="#e19136"
+            upColor="#0066ff"
           />
         </Shader>
         <div className="absolute inset-0 bg-black/20" />
       </div>
 
       <nav
-        className={`fixed left-0 right-0 top-0 z-50 flex items-center justify-between px-6 py-6 transition-opacity duration-700 md:px-12 ${
+        className={`fixed top-0 right-0 left-0 z-50 flex items-center justify-between px-6 py-6 transition-opacity duration-700 md:px-12 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
       >
         <Button
+          className="flex items-center gap-2 bg-transparent transition-transform hover:scale-105 hover:bg-transparent"
           onClick={() => scrollToSection(0)}
-          className="flex items-center gap-2 transition-transform hover:scale-105 bg-transparent hover:bg-transparent"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-foreground/15 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-foreground/25">
-            <span className="font-sans text-xl font-bold text-foreground">A</span>
+            <span className="font-bold font-sans text-foreground text-xl">
+              A
+            </span>
           </div>
-          <span className="font-sans text-xl font-semibold tracking-tight text-foreground bg-transparent">Page Mind</span>
+          <span className="bg-transparent font-sans font-semibold text-foreground text-xl tracking-tight">
+            Page Mind
+          </span>
         </Button>
 
         <div className="hidden items-center gap-8 md:flex">
-          {["Overview", "Sessions", "Capabilities", "Why Page Mind", "Sign Up"].map((item, index) => (
+          {[
+            "Overview",
+            "Sessions",
+            "Capabilities",
+            "Why Page Mind",
+            "Sign Up",
+          ].map((item, index) => (
             <Button
+              className={`group relative bg-transparent font-medium font-sans text-sm transition-colors ${
+                currentSection === index
+                  ? "text-foreground/80 hover:bg-transparent"
+                  : "text-foreground/80 hover:bg-transparent"
+              }`}
               key={item}
               onClick={() => scrollToSection(index)}
-              className={`group relative font-sans text-sm font-medium transition-colors bg-transparent ${
-                currentSection === index ? "text-foreground/80 hover:bg-transparent" : "text-foreground/80 hover:bg-transparent"
-              }`}
             >
               {item}
               <span
@@ -245,54 +273,63 @@ export default function Home() {
           ))}
         </div>
 
-        <MagneticButton variant="secondary" onClick={() => scrollToSection(4)}>
+        <MagneticButton onClick={() => scrollToSection(4)} variant="secondary">
           Get Started
         </MagneticButton>
       </nav>
 
       <div
-        ref={scrollContainerRef}
-        data-scroll-container
-        className={`relative z-10 flex h-screen overflow-x-auto overflow-y-hidden transition-opacity duration-700 scrollbar-none ${
+        className={`scrollbar-none relative z-10 flex h-screen overflow-x-auto overflow-y-hidden transition-opacity duration-700 ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
+        data-scroll-container
+        ref={scrollContainerRef}
       >
         {/* Hero Section */}
-        <section className="flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pb-16 pt-24 md:px-12 md:pb-24">
+        <section className="flex min-h-screen w-screen shrink-0 flex-col justify-end px-6 pt-24 pb-16 md:px-12 md:pb-24">
           <div className="max-w-3xl">
-            <div className="mb-4 inline-block animate-in fade-in slide-in-from-bottom-4 rounded-full border border-foreground/20 bg-foreground/15 px-4 py-1.5 backdrop-blur-md duration-700">
-              <p className="font-mono text-xs text-foreground/90">Perplexity-powered research workspace</p>
+            <div className="fade-in slide-in-from-bottom-4 mb-4 inline-block animate-in rounded-full border border-foreground/20 bg-foreground/15 px-4 py-1.5 backdrop-blur-md duration-700">
+              <p className="font-mono text-foreground/90 text-xs">
+                Perplexity-powered research workspace
+              </p>
             </div>
-            <h1 className="mb-6 animate-in fade-in slide-in-from-bottom-8 font-sans text-6xl font-light leading-[1.1] tracking-tight text-foreground duration-1000 md:text-7xl lg:text-8xl">
+            <h1 className="fade-in slide-in-from-bottom-8 mb-6 animate-in font-light font-sans text-6xl text-foreground leading-[1.1] tracking-tight duration-1000 md:text-7xl lg:text-8xl">
               <span className="text-balance">
                 Collaborative research that
                 <br />
                 remembers every insight
               </span>
             </h1>
-            <p className="mb-8 max-w-xl animate-in fade-in slide-in-from-bottom-4 text-lg leading-relaxed text-foreground/90 duration-1000 delay-200 md:text-xl">
+            <p className="fade-in slide-in-from-bottom-4 mb-8 max-w-xl animate-in text-foreground/90 text-lg leading-relaxed delay-200 duration-1000 md:text-xl">
               <span className="text-pretty">
-                Spin up a shared Perplexity workspace with streaming responses, session history, rename and delete controls,
-                bring-your-own-key support, and realtime usage analytics for every answer.
+                Spin up a shared Perplexity workspace with streaming responses,
+                session history, rename and delete controls, bring-your-own-key
+                support, and realtime usage analytics for every answer.
               </span>
             </p>
-            <div className="flex animate-in fade-in slide-in-from-bottom-4 flex-col gap-4 duration-1000 delay-300 sm:flex-row sm:items-center">
+            <div className="fade-in slide-in-from-bottom-4 flex animate-in flex-col gap-4 delay-300 duration-1000 sm:flex-row sm:items-center">
               <MagneticButton
+                onClick={() => scrollToSection(4)}
                 size="lg"
                 variant="primary"
-                onClick={() => scrollToSection(4)}
               >
                 Open dashboard
               </MagneticButton>
-              <MagneticButton size="lg" variant="secondary" onClick={() => scrollToSection(1)}>
+              <MagneticButton
+                onClick={() => scrollToSection(1)}
+                size="lg"
+                variant="secondary"
+              >
                 Explore features
               </MagneticButton>
             </div>
           </div>
 
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-in fade-in duration-1000 delay-500">
+          <div className="fade-in absolute bottom-8 left-1/2 -translate-x-1/2 animate-in delay-500 duration-1000">
             <div className="flex items-center gap-2">
-              <p className="font-mono text-xs text-foreground/80">Scroll sideways to tour the platform</p>
+              <p className="font-mono text-foreground/80 text-xs">
+                Scroll sideways to tour the platform
+              </p>
               <div className="flex h-6 w-12 items-center justify-center rounded-full border border-foreground/20 bg-foreground/15 backdrop-blur-md">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-foreground/80" />
               </div>
@@ -306,11 +343,11 @@ export default function Home() {
         <ContactSection />
       </div>
 
-      <style jsx global>{`
+      <style global jsx>{`
         div::-webkit-scrollbar {
           display: none;
         }
       `}</style>
     </main>
-  )
+  );
 }

@@ -20,7 +20,10 @@ declare global {
   var mongooseCache: MongooseCache | undefined;
 }
 
-const cached: MongooseCache = global.mongooseCache || { conn: null, promise: null };
+const cached: MongooseCache = global.mongooseCache || {
+  conn: null,
+  promise: null,
+};
 
 if (!global.mongooseCache) {
   global.mongooseCache = cached;
@@ -36,8 +39,8 @@ export async function MongoDBClientConnection() {
       bufferCommands: false,
       maxPoolSize: 10,
       minPoolSize: 2,
-      socketTimeoutMS: 45000,
-      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45_000,
+      serverSelectionTimeoutMS: 10_000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI as string, opts);
@@ -49,7 +52,7 @@ export async function MongoDBClientConnection() {
     cached.promise = null;
     throw e;
   }
-  
+
   // Return the native MongoDB Db instance for better-auth
   return cached.conn.connection.getClient().db();
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import MagneticButton from "@/components/MagneticButton";
+import MagneticButton from "@/components/magneticButton";
 import { useReveal } from "@/hooks/useReveal";
 
 export default function AboutSection({
@@ -12,8 +12,8 @@ export default function AboutSection({
 
   return (
     <section
-      ref={ref}
       className="flex h-screen w-screen shrink-0 snap-start items-center px-4 pt-20 md:px-12 md:pt-0 lg:px-16"
+      ref={ref}
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid gap-8 md:grid-cols-2 md:gap-16 lg:gap-24">
@@ -26,7 +26,7 @@ export default function AboutSection({
                   : "-translate-y-12 opacity-0"
               }`}
             >
-              <h2 className="mb-3 font-sans text-3xl font-light leading-[1.1] tracking-tight text-foreground md:mb-4 md:text-6xl lg:text-7xl">
+              <h2 className="mb-3 font-light font-sans text-3xl text-foreground leading-[1.1] tracking-tight md:mb-4 md:text-6xl lg:text-7xl">
                 Building the
                 <br />
                 future of
@@ -42,13 +42,15 @@ export default function AboutSection({
                   : "translate-y-8 opacity-0"
               } delay-[200ms]`}
             >
-              <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                Page Mind is focused on the workflows behind great answers—streaming transcripts,
-                durable storage, and the controls teams need to keep research organised.
+              <p className="max-w-md text-foreground/90 text-sm leading-relaxed md:text-lg">
+                Page Mind is focused on the workflows behind great
+                answers—streaming transcripts, durable storage, and the controls
+                teams need to keep research organised.
               </p>
-              <p className="max-w-md text-sm leading-relaxed text-foreground/90 md:text-lg">
-                From instant session recovery to audit-ready usage metrics, every feature is built
-                to help analysts, founders, and operators trust their AI copilots.
+              <p className="max-w-md text-foreground/90 text-sm leading-relaxed md:text-lg">
+                From instant session recovery to audit-ready usage metrics,
+                every feature is built to help analysts, founders, and operators
+                trust their AI copilots.
               </p>
             </div>
           </div>
@@ -75,8 +77,10 @@ export default function AboutSection({
                 direction: "right",
               },
             ].map((stat, i) => {
-              const delayClass = ["delay-300", "delay-[450ms]", "delay-[600ms]"][i] ?? "";
-              const alignmentClass = i % 2 === 0 ? "max-w-full" : "ml-auto max-w-[85%]";
+              const delayClass =
+                ["delay-300", "delay-[450ms]", "delay-[600ms]"][i] ?? "";
+              const alignmentClass =
+                i % 2 === 0 ? "max-w-full" : "ml-auto max-w-[85%]";
               const getRevealClass = () => {
                 if (!isVisible) {
                   return stat.direction === "left"
@@ -88,17 +92,17 @@ export default function AboutSection({
 
               return (
                 <div
-                  key={i}
-                  className={`flex items-baseline gap-4 border-l border-foreground/30 pl-4 transition-all duration-700 md:gap-8 md:pl-8 ${getRevealClass()} ${delayClass} ${alignmentClass}`}
+                  className={`flex items-baseline gap-4 border-foreground/30 border-l pl-4 transition-all duration-700 md:gap-8 md:pl-8 ${getRevealClass()} ${delayClass} ${alignmentClass}`}
+                  key={stat.label}
                 >
-                  <div className="text-3xl font-light text-foreground md:text-6xl lg:text-7xl">
+                  <div className="font-light text-3xl text-foreground md:text-6xl lg:text-7xl">
                     {stat.value}
                   </div>
                   <div>
-                    <div className="font-sans text-base font-light text-foreground md:text-xl">
+                    <div className="font-light font-sans text-base text-foreground md:text-xl">
                       {stat.label}
                     </div>
-                    <div className="font-mono text-xs text-foreground/60">
+                    <div className="font-mono text-foreground/60 text-xs">
                       {stat.sublabel}
                     </div>
                   </div>
@@ -114,16 +118,16 @@ export default function AboutSection({
           } delay-[750ms]`}
         >
           <MagneticButton
+            onClick={() => scrollToSection?.(4)}
             size="lg"
             variant="primary"
-            onClick={() => scrollToSection?.(4)}
           >
             Start a Project
           </MagneticButton>
           <MagneticButton
+            onClick={() => scrollToSection?.(1)}
             size="lg"
             variant="secondary"
-            onClick={() => scrollToSection?.(1)}
           >
             View Our Work
           </MagneticButton>

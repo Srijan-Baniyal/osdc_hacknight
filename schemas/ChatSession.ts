@@ -1,10 +1,15 @@
-import mongoose, { Model, Schema } from "mongoose";
-import { MongoDBClientConnection } from "@/schemas/MongoDBClientConnection";
+import mongoose, { type Model, Schema } from "mongoose";
+import { MongoDBClientConnection } from "@/schemas/mongoDbClientConnection";
 
 export interface TokenUsage {
   inputTokens?: number | null;
   outputTokens?: number | null;
   totalTokens?: number | null;
+}
+
+export interface Source {
+  url: string;
+  title?: string;
 }
 
 export interface ChatMessage {
@@ -14,6 +19,7 @@ export interface ChatMessage {
   usage?: TokenUsage;
   durationMs?: number;
   sourceCount?: number;
+  sources?: Source[];
   apiKeyType?: "default" | "custom";
 }
 
@@ -54,6 +60,15 @@ const ChatMessageSchema = new Schema<ChatMessage>(
     sourceCount: {
       type: Number,
       default: null,
+    },
+    sources: {
+      type: [
+        {
+          url: { type: String, required: true },
+          title: { type: String, default: null },
+        },
+      ],
+      default: [],
     },
     apiKeyType: {
       type: String,

@@ -1,17 +1,17 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
 import {
   createContext,
+  type FormEvent,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type FormEvent,
 } from "react";
-import axios, { AxiosError } from "axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export type ChatRole = "user" | "assistant";
@@ -22,6 +22,11 @@ export interface TokenUsage {
   totalTokens?: number | null;
 }
 
+export interface Source {
+  url: string;
+  title?: string;
+}
+
 export interface ChatMessage {
   role: ChatRole;
   content: string;
@@ -29,6 +34,7 @@ export interface ChatMessage {
   usage?: TokenUsage;
   durationMs?: number | null;
   sourceCount?: number | null;
+  sources?: Source[];
   apiKeyType?: "default" | "custom";
 }
 
@@ -44,9 +50,13 @@ const CHAT_SESSIONS_KEY = ["chat-sessions"] as const;
 const API_KEY_STORAGE_KEY = "perplexity:api-key";
 
 export const formatTimestamp = (value?: string | Date) => {
-  if (!value) return "";
+  if (!value) {
+    return "";
+  }
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
   return new Intl.DateTimeFormat("en", {
     hour: "2-digit",
     minute: "2-digit",
@@ -89,17 +99,25 @@ interface ChatDashboardContextValue {
   isManagingSession: boolean;
 }
 
-const ChatDashboardContext = createContext<ChatDashboardContextValue | null>(null);
+const ChatDashboardContext = createContext<ChatDashboardContextValue | null>(
+  null
+);
 
 export function useChatDashboard() {
   const context = useContext(ChatDashboardContext);
   if (!context) {
-    throw new Error("useChatDashboard must be used inside ChatDashboardProvider");
+    throw new Error(
+      "useChatDashboard must be used inside ChatDashboardProvider"
+    );
   }
   return context;
 }
 
-export function ChatDashboardProvider({ children }: { children: React.ReactNode }) {
+export function ChatDashboardProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const queryClient = useQueryClient();
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -137,10 +155,16 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const wasStreamingRef = useRef(false);
 
-  const { data: sessionsData, isLoading: isHistoryLoading, isFetching: isHistoryFetching } = useQuery({
+  const {
+    data: sessionsData,
+    isLoading: isHistoryLoading,
+    isFetching: isHistoryFetching,
+  } = useQuery({
     queryKey: CHAT_SESSIONS_KEY,
     queryFn: async () => {
-      const response = await axios.get<{ sessions: ChatSession[] }>("/api/chat/history");
+      const response = await axios.get<{ sessions: ChatSession[] }>(
+        "/api/chat/history"
+      );
       return response.data.sessions;
     },
     staleTime: 1000 * 30,
@@ -150,9 +174,12 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
     }
-  }, [messages]);
+  }, []);
 
   useEffect(() => {
     const wasStreaming = wasStreamingRef.current;
@@ -177,7 +204,11 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
   }, [isStreaming, activeSessionId, sessions]);
 
   const sendPromptMutation = useMutation({
-    mutationFn: async ({ prompt, conversationId, apiKey: providedKey }: SendPromptVariables) => {
+    mutationFn: async ({
+      prompt,
+      conversationId,
+      apiKey: providedKey,
+    }: SendPromptVariables) => {
       await new Promise<void>((resolve, reject) => {
         const controller = new AbortController();
         abortControllerRef.current = controller;
@@ -187,8 +218,11 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
         let done = false;
         let settled = false;
 
+        // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Event parsing logic requires sequential state handling
         const parseEvent = (rawEvent: string) => {
-          if (!rawEvent.trim()) return;
+          if (!rawEvent.trim()) {
+            return;
+          }
 
           const lines = rawEvent.split("\n");
           let eventName = "message";
@@ -204,7 +238,9 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
             }
           }
 
-          if (!dataPayload) return;
+          if (!dataPayload) {
+            return;
+          }
 
           if (eventName === "conversation") {
             conversationIdRef.current = dataPayload;
@@ -237,10 +273,12 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
               usage?: TokenUsage | null;
               durationMs?: number | null;
               sourceCount?: number | null;
+              sources?: Source[];
               apiKeyType?: "default" | "custom";
             }>(dataPayload);
 
             if (parsed) {
+              // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Message state update requires complex conditional logic
               setMessages((prev) => {
                 const index = assistantMessageIndexRef.current;
                 if (index === null || index >= prev.length) {
@@ -249,20 +287,23 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
 
                 const updated = [...prev];
                 const existing = updated[index];
-                const nextUsage = parsed.usage === null ? undefined : parsed.usage;
+                const nextUsage =
+                  parsed.usage === null ? undefined : parsed.usage;
                 const hasDuration = typeof parsed.durationMs === "number";
                 const hasSourceCount = typeof parsed.sourceCount === "number";
+                const hasSources = Array.isArray(parsed.sources);
                 updated[index] = {
                   ...existing,
                   usage: nextUsage ?? existing.usage,
                   durationMs:
                     hasDuration || parsed.durationMs === null
-                      ? parsed.durationMs ?? undefined
+                      ? (parsed.durationMs ?? undefined)
                       : existing.durationMs,
                   sourceCount:
                     hasSourceCount || parsed.sourceCount === null
-                      ? parsed.sourceCount ?? undefined
+                      ? (parsed.sourceCount ?? undefined)
                       : existing.sourceCount,
+                  sources: hasSources ? parsed.sources : existing.sources,
                   apiKeyType: parsed.apiKeyType ?? existing.apiKeyType,
                 };
 
@@ -296,18 +337,25 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
             {
               responseType: "text",
               signal: controller.signal,
+              // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: SSE stream parsing requires complex event handling
               onDownloadProgress: (progressEvent) => {
                 const nativeEvent = progressEvent.event;
                 const target = nativeEvent?.target as XMLHttpRequest | null;
-                if (!target) return;
+                if (!target) {
+                  return;
+                }
 
                 const responseText = target.responseText ?? "";
-                if (!responseText) return;
+                if (!responseText) {
+                  return;
+                }
 
                 const chunk = responseText.slice(processedLength);
                 processedLength = responseText.length;
 
-                if (!chunk) return;
+                if (!chunk) {
+                  return;
+                }
 
                 buffer += chunk;
 
@@ -332,7 +380,7 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
                 buffer = "";
               }
               if (!done) {
-                parseEvent(`event: done\ndata: ok`);
+                parseEvent("event: done\ndata: ok");
               }
               resolve();
             }
@@ -344,7 +392,10 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
             settled = true;
             if (axios.isCancel(error)) {
               reject(new Error("Request cancelled"));
-            } else if (error instanceof AxiosError && error.response?.data?.error) {
+            } else if (
+              error instanceof AxiosError &&
+              error.response?.data?.error
+            ) {
               reject(new Error(error.response.data.error));
             } else {
               reject(error);
@@ -359,13 +410,16 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
       setIsStreaming(true);
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Unable to send message";
+      const message =
+        error instanceof Error ? error.message : "Unable to send message";
       if (message === "Request cancelled") {
         toast.info("Response cancelled");
       } else {
         setMessages((prev) => {
           const index = assistantMessageIndexRef.current;
-          if (index === null || index >= prev.length) return prev;
+          if (index === null || index >= prev.length) {
+            return prev;
+          }
           const updated = [...prev];
           updated[index] = {
             ...updated[index],
@@ -384,7 +438,13 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
   });
 
   const renameSessionMutation = useMutation({
-    mutationFn: async ({ sessionId, title }: { sessionId: string; title: string }) => {
+    mutationFn: async ({
+      sessionId,
+      title,
+    }: {
+      sessionId: string;
+      title: string;
+    }) => {
       const response = await axios.patch<{ session: ChatSession }>(
         `/api/chat/session/${sessionId}`,
         { title }
@@ -392,18 +452,24 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
       return response.data.session;
     },
     onSuccess: (updatedSession) => {
-      queryClient.setQueryData<ChatSession[] | undefined>(CHAT_SESSIONS_KEY, (prev) => {
-        if (!prev) return prev;
-        return prev.map((session) =>
-          session._id === updatedSession._id
-            ? { ...session, title: updatedSession.title }
-            : session
-        );
-      });
+      queryClient.setQueryData<ChatSession[] | undefined>(
+        CHAT_SESSIONS_KEY,
+        (prev) => {
+          if (!prev) {
+            return prev;
+          }
+          return prev.map((session) =>
+            session._id === updatedSession._id
+              ? { ...session, title: updatedSession.title }
+              : session
+          );
+        }
+      );
       toast.success("Chat renamed");
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Failed to rename chat";
+      const message =
+        error instanceof Error ? error.message : "Failed to rename chat";
       toast.error(message);
     },
   });
@@ -414,10 +480,15 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
       return sessionId;
     },
     onSuccess: (removedSessionId) => {
-      queryClient.setQueryData<ChatSession[] | undefined>(CHAT_SESSIONS_KEY, (prev) => {
-        if (!prev) return prev;
-        return prev.filter((session) => session._id !== removedSessionId);
-      });
+      queryClient.setQueryData<ChatSession[] | undefined>(
+        CHAT_SESSIONS_KEY,
+        (prev) => {
+          if (!prev) {
+            return prev;
+          }
+          return prev.filter((session) => session._id !== removedSessionId);
+        }
+      );
 
       if (activeSessionId === removedSessionId) {
         setActiveSessionId(null);
@@ -430,7 +501,8 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
       toast.success("Chat deleted");
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : "Failed to delete chat";
+      const message =
+        error instanceof Error ? error.message : "Failed to delete chat";
       toast.error(message);
     },
   });
@@ -469,7 +541,11 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
         return updated;
       });
 
-      sendPromptMutation.mutate({ prompt, conversationId: targetConversationId, apiKey: activeApiKey });
+      sendPromptMutation.mutate({
+        prompt,
+        conversationId: targetConversationId,
+        apiKey: activeApiKey,
+      });
       setInput("");
     },
     [input, sendPromptMutation, activeSessionId]
@@ -499,7 +575,9 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
         return;
       }
       const session = sessions.find((item) => item._id === sessionId);
-      setMessages(session ? session.messages.map((message) => ({ ...message })) : []);
+      setMessages(
+        session ? session.messages.map((message) => ({ ...message })) : []
+      );
       setActiveSessionId(sessionId);
       conversationIdRef.current = sessionId;
       assistantMessageIndexRef.current = null;
@@ -554,7 +632,8 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
       handleStop,
       isStreaming,
       isSending: sendPromptMutation.isPending,
-      isManagingSession: renameSessionMutation.isPending || deleteSessionMutation.isPending,
+      isManagingSession:
+        renameSessionMutation.isPending || deleteSessionMutation.isPending,
     }),
     [
       sessions,
@@ -578,5 +657,9 @@ export function ChatDashboardProvider({ children }: { children: React.ReactNode 
     ]
   );
 
-  return <ChatDashboardContext.Provider value={contextValue}>{children}</ChatDashboardContext.Provider>;
+  return (
+    <ChatDashboardContext.Provider value={contextValue}>
+      {children}
+    </ChatDashboardContext.Provider>
+  );
 }

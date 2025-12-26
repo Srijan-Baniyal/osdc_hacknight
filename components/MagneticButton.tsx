@@ -24,7 +24,9 @@ export default function MagneticButton({
   const rafRef = useRef<number | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!ref.current) return;
+    if (!ref.current) {
+      return;
+    }
 
     const rect = ref.current.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
@@ -32,7 +34,9 @@ export default function MagneticButton({
 
     positionRef.current = { x: x * 0.15, y: y * 0.15 };
 
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
     rafRef.current = requestAnimationFrame(() => {
       if (ref.current) {
         ref.current.style.transform = `translate3d(${positionRef.current.x}px, ${positionRef.current.y}px, 0)`;
@@ -42,7 +46,9 @@ export default function MagneticButton({
 
   const handleMouseLeave = () => {
     positionRef.current = { x: 0, y: 0 };
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
     rafRef.current = requestAnimationFrame(() => {
       if (ref.current) {
         ref.current.style.transform = "translate3d(0px, 0px, 0)";
@@ -65,26 +71,21 @@ export default function MagneticButton({
   };
 
   return (
-    <>
-      <Button
-        ref={ref}
-        onClick={onClick}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        className={`
-          relative overflow-hidden rounded-full font-medium
-          transition-all duration-300 ease-out will-change-transform
-          ${variants[variant]}
+    <Button
+      className={`relative overflow-hidden rounded-full font-medium transition-all duration-300 ease-out will-change-transform ${variants[variant]}
           ${sizes[size]}
           ${className}
         `}
-        style={{
-          transform: "translate3d(0px, 0px, 0)",
-          contain: "layout style paint",
-        }}
-      >
-        <span className="relative z-10">{children}</span>
-      </Button>
-    </>
+      onClick={onClick}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
+      ref={ref}
+      style={{
+        transform: "translate3d(0px, 0px, 0)",
+        contain: "layout style paint",
+      }}
+    >
+      <span className="relative z-10">{children}</span>
+    </Button>
   );
 }

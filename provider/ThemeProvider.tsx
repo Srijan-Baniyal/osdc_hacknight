@@ -9,7 +9,9 @@ export default function ThemeProvider({
   children: React.ReactNode;
 }) {
   const mounted = useSyncExternalStore(
-    () => () => {},
+    () => () => {
+      // Intentional noop - no cleanup needed for mount state
+    },
     () => true,
     () => false
   );
@@ -18,16 +20,14 @@ export default function ThemeProvider({
     return null;
   }
   return (
-    <>
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-        storageKey="mailshift-ui-theme"
-      >
-        {children}
-      </NextThemesProvider>
-    </>
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      disableTransitionOnChange
+      enableSystem
+      storageKey="mailshift-ui-theme"
+    >
+      {children}
+    </NextThemesProvider>
   );
 }

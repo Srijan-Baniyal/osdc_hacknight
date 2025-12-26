@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getChatSessionModel } from "@/schemas/ChatSession";
+import { NextResponse } from "next/server";
+import { getChatSessionModel } from "@/schemas/chatSession";
 
 export async function GET() {
   try {

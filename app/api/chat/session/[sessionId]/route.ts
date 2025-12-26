@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { Types } from "mongoose";
-import { getChatSessionModel } from "@/schemas/ChatSession";
+import { NextResponse } from "next/server";
+import { getChatSessionModel } from "@/schemas/chatSession";
 
 const MAX_TITLE_LENGTH = 120;
 
@@ -18,7 +18,7 @@ export async function PATCH(
     }
 
     const { sessionId } = await context.params;
-    if (!sessionId || !Types.ObjectId.isValid(sessionId)) {
+    if (!(sessionId && Types.ObjectId.isValid(sessionId))) {
       return NextResponse.json({ error: "Invalid chat id" }, { status: 400 });
     }
 
@@ -71,7 +71,7 @@ export async function DELETE(
     }
 
     const { sessionId } = await context.params;
-    if (!sessionId || !Types.ObjectId.isValid(sessionId)) {
+    if (!(sessionId && Types.ObjectId.isValid(sessionId))) {
       return NextResponse.json({ error: "Invalid chat id" }, { status: 400 });
     }
 

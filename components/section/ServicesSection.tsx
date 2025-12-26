@@ -7,8 +7,8 @@ export default function ServicesSection() {
 
   return (
     <section
-      ref={ref}
       className="flex h-screen w-screen shrink-0 snap-start items-center px-6 pt-20 md:px-12 md:pt-0 lg:px-16"
+      ref={ref}
     >
       <div className="mx-auto w-full max-w-7xl">
         <div
@@ -18,10 +18,10 @@ export default function ServicesSection() {
               : "-translate-y-12 opacity-0"
           }`}
         >
-          <h2 className="mb-2 font-sans text-5xl font-light tracking-tight text-foreground md:text-6xl lg:text-7xl">
+          <h2 className="mb-2 font-light font-sans text-5xl text-foreground tracking-tight md:text-6xl lg:text-7xl">
             Platform capabilities
           </h2>
-          <p className="font-mono text-sm text-foreground/60 md:text-base">
+          <p className="font-mono text-foreground/60 text-sm md:text-base">
             / Built for research teams that ship fast
           </p>
         </div>
@@ -54,10 +54,10 @@ export default function ServicesSection() {
             },
           ].map((service, i) => (
             <ServiceCard
-              key={i}
-              service={service}
               index={i}
               isVisible={isVisible}
+              key={service.title}
+              service={service}
             />
           ))}
         </div>
@@ -75,7 +75,8 @@ function ServiceCard({
   index: number;
   isVisible: boolean;
 }) {
-  const delayClass = ["delay-0", "delay-[150ms]", "delay-[300ms]", "delay-[450ms]"][index] ?? "";
+  const delayClass =
+    ["delay-0", "delay-[150ms]", "delay-[300ms]", "delay-[450ms]"][index] ?? "";
   const getRevealClass = () => {
     if (!isVisible) {
       switch (service.direction) {
@@ -100,14 +101,14 @@ function ServiceCard({
     >
       <div className="mb-3 flex items-center gap-3">
         <div className="h-px w-8 bg-foreground/30 transition-all duration-300 group-hover:w-12 group-hover:bg-foreground/50" />
-        <span className="font-mono text-xs text-foreground/60">
+        <span className="font-mono text-foreground/60 text-xs">
           0{index + 1}
         </span>
       </div>
-      <h3 className="mb-2 font-sans text-2xl font-light text-foreground md:text-3xl">
+      <h3 className="mb-2 font-light font-sans text-2xl text-foreground md:text-3xl">
         {service.title}
       </h3>
-      <p className="max-w-sm text-sm leading-relaxed text-foreground/80 md:text-base">
+      <p className="max-w-sm text-foreground/80 text-sm leading-relaxed md:text-base">
         {service.description}
       </p>
     </div>
