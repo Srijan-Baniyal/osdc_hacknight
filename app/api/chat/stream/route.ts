@@ -7,7 +7,7 @@ import {
   type ChatSessionDocument,
   getChatSessionModel,
   type TokenUsage,
-} from "@/schemas/chatSession";
+} from "@/schemas/ChatSession";
 
 interface ChatStreamRequestBody {
   prompt?: string;

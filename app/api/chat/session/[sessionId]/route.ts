@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
-import { getChatSessionModel } from "@/schemas/chatSession";
+import { getChatSessionModel } from "@/schemas/ChatSession";
 
 const MAX_TITLE_LENGTH = 120;
 
