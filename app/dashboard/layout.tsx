@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AppSidebar } from "@/components/Dashboard/DashboardSidebar";
+import { DashboardSidebar } from "@/components/Dashboard/DashboardSidebar";
 import { Navbar } from "@/components/Dashboard/DashboardNavbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ChatDashboardProvider } from "@/context/ChatContext";
@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <SidebarProvider>
       <ChatDashboardProvider>
-        <AppSidebar />
+        <DashboardSidebar />
         <SidebarInset>
           <Navbar />
           <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>

@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatTimestamp, useChatDashboard } from "@/context/ChatContext";
 import { cn } from "@/lib/utils";
 
-export function AppSidebar() {
+export function DashboardSidebar() {
   const {
     sessions,
     isSidebarLoading,

@@ -1,7 +1,7 @@
 "use client";
 
 import { SignOutButton } from "@clerk/nextjs";
-import ThemeSwitcher from "@/components/themeSwitcher";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
