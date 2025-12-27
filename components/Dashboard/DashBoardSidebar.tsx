@@ -18,7 +18,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatTimestamp, useChatDashboard } from "@/context/chatContext";
+import { formatTimestamp, useChatDashboard } from "@/context/ChatContext";
 import { cn } from "@/lib/utils";
 
 export function AppSidebar() {

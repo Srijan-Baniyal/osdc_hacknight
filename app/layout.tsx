@@ -5,7 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { headers } from "next/headers";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
-import ReactQueryProvider from "@/provider/reactQueryProvider";
+import ReactQueryProvider from "@/provider/ReactQueryProvider";
 import ThemeProvider from "@/provider/themeProvider";
 
 const geistSans = Geist({

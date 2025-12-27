@@ -1,6 +1,6 @@
 "use client";
 
-import MagneticButton from "@/components/magneticButton";
+import MagneticButton from "@/components/MagneticButton";
 import { useReveal } from "@/hooks/useReveal";
 
 export default function AboutSection({

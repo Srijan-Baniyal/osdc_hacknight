@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { AppSidebar } from "@/components/Dashboard/dashBoardSidebar";
-import { Navbar } from "@/components/Dashboard/dashboardNavbar";
+import { AppSidebar } from "@/components/Dashboard/DashboardSidebar";
+import { Navbar } from "@/components/Dashboard/DashboardNavbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { ChatDashboardProvider } from "@/context/chatContext";
+import { ChatDashboardProvider } from "@/context/ChatContext";
 
 export const metadata: Metadata = {
   title: "Percepta Dashboard",

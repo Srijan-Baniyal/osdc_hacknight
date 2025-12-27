@@ -10,7 +10,7 @@ import {
   formatTimestamp,
   type Source,
   useChatDashboard,
-} from "@/context/chatContext";
+} from "@/context/ChatContext";
 import { cn } from "@/lib/utils";
 
 interface ParsedAssistantContent {

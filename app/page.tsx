@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChromaFlow, Shader, Swirl } from "shaders/react";
-import CustomCursor from "@/components/customCursor";
-import GrainOverlay from "@/components/grainOverlay";
-import MagneticButton from "@/components/magneticButton";
-import AboutSection from "@/components/section/aboutSection";
-import ContactSection from "@/components/section/contactSection";
-import ServicesSection from "@/components/section/servicesSection";
-import WorkSection from "@/components/section/workSection";
+import CustomCursor from "@/components/CustomCursoe";
+import GrainOverlay from "@/components/GrainOverlay";
+import MagneticButton from "@/components/MagneticButton";
+import AboutSection from "@/components/section/AboutSection";
+import ContactSection from "@/components/section/ContactSection";
+import ServicesSection from "@/components/section/ServiceSection";
+import WorkSection from "@/components/section/WorkSection";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
