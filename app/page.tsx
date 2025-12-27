@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChromaFlow, Shader, Swirl } from "shaders/react";
-import CustomCursor from "@/components/CustomCursoe";
+import CustomCursor from "@/components/CustomCursor";
 import GrainOverlay from "@/components/GrainOverlay";
 import MagneticButton from "@/components/MagneticButton";
 import AboutSection from "@/components/section/AboutSection";
