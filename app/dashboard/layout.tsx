@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DashboardSidebar } from "@/components/Dashboard/DashboardSidebar";
+import { DashboardSidebar } from "@/components/Dashboard/DashboardSidebarMain";
 import { Navbar } from "@/components/Dashboard/DashboardNavbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ChatDashboardProvider } from "@/context/ChatContext";

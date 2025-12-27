@@ -1,5 +1,5 @@
 import mongoose, { type Model, Schema } from "mongoose";
-import { MongoDBClientConnection } from "@/schemas/mongoDbClientConnection";
+import { MongoDBClientConnection } from "@/schemas/MongoClientConnection";
 
 export interface TokenUsage {
   inputTokens?: number | null;
